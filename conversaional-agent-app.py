@@ -5,7 +5,7 @@ import wikipedia
 from zoneinfo import ZoneInfo
 from dotenv import load_dotenv, find_dotenv
 from pydantic import BaseModel, Field
-from typing import List
+
 import streamlit as st
 
 # LangChain core
@@ -25,9 +25,47 @@ from langgraph.prebuilt import create_react_agent
 # ----------------------------------------------------------------
 _ = load_dotenv(find_dotenv())
 
-# Configure Streamlit page
-st.set_page_config(page_title="Conversational AI Agent", layout="wide")
-st.title("🤖 Conversational AI Agent (Powered by Groq)")
+# ----------------------------------------------------------------
+# Streamlit Page Config & Custom CSS
+# ----------------------------------------------------------------
+st.set_page_config(
+    page_title="AI Agent",
+    page_icon="◉",
+    layout="centered",
+    initial_sidebar_state="collapsed",
+)
+
+def load_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+load_css("style.css")
+
+# ── Header ──
+st.markdown("""
+<div class="hero-header">
+    <div class="logo">◉</div>
+    <h1>AI Agent</h1>
+    <p>Weather · Wikipedia · Converter · World Clock · PDF Q&A</p>
+</div>
+<div class="divider"></div>
+""", unsafe_allow_html=True)
+
+# ── Capability Pills ──
+st.markdown("""
+<div class="pills">
+    <span class="pill">🌡 Weather</span>
+    <span class="pill">📖 Wikipedia</span>
+    <span class="pill">💱 Converter</span>
+    <span class="pill">🕐 World Clock</span>
+    <span class="pill">📄 PDF Q&A</span>
+</div>
+""", unsafe_allow_html=True)
+
+
+# ================================================================
+#  TOOLS  (unchanged backend logic)
+# ================================================================
 
 # ----------------------------------------------------------------
 # Tool 1: Weather Tool
@@ -274,9 +312,10 @@ def query_pdf_documents(question: str) -> str:
     response = llm.invoke(prompt)
     return response.content
 
-# ----------------------------------------------------------------
-# Streamlit UI & Agent Setup
-# ----------------------------------------------------------------
+
+# ================================================================
+#  AGENT SETUP
+# ================================================================
 
 tools = [
     get_current_temperature,
@@ -286,21 +325,37 @@ tools = [
     query_pdf_documents,
 ]
 
-# Removed Sidebar UI in favor of inline chat input upload
-
 # Ensure API Key is available
 groq_api_key = os.getenv("GROQ_API_KEY")
 if not groq_api_key:
-    st.error("GROQ_API_KEY is missing from environment variables. Please add it to your .env file.")
+    st.markdown(
+        '<div class="status-toast">⚠ GROQ_API_KEY missing — add it to your .env file.</div>',
+        unsafe_allow_html=True,
+    )
     st.stop()
 
 # Initialize the Groq model and LangGraph Agent
 llm = ChatGroq(api_key=groq_api_key, model=PDF_QA_MODEL, temperature=0.2)
 agent_executor = create_react_agent(llm, tools)
 
+
+# ================================================================
+#  CHAT UI
+# ================================================================
+
 # Initialize Session State for Chat History
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+# Empty state (shown when no messages yet)
+if not st.session_state.messages:
+    st.markdown("""
+    <div class="empty-state">
+        <div class="icon">💬</div>
+        <p>Ask me about the weather, look something up on Wikipedia,
+        convert currencies &amp; units, check world clocks, or upload a PDF to chat with it.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Display Chat History
 for message in st.session_state.messages:
@@ -308,7 +363,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # User Input
-if prompt := st.chat_input("Ask me anything or attach a PDF...", accept_file=True, file_type=["pdf"]):
+if prompt := st.chat_input("Message…", accept_file=True, file_type=["pdf"]):
     # Handle string vs ChatInputValue
     if isinstance(prompt, str):
         user_input = prompt
@@ -337,7 +392,7 @@ if prompt := st.chat_input("Ask me anything or attach a PDF...", accept_file=Tru
             
         # Add a status message to chat history
         names_str = ", ".join(file_names)
-        status_msg = f"✅ Successfully uploaded and processed: {names_str}. I am ready to answer questions about them!"
+        status_msg = f"📄 Uploaded **{names_str}** — ready to answer questions about it."
         st.session_state.messages.append({"role": "assistant", "content": status_msg})
         with st.chat_message("assistant"):
             st.markdown(status_msg)
@@ -358,7 +413,7 @@ if prompt := st.chat_input("Ask me anything or attach a PDF...", accept_file=Tru
                 chat_history.append(("assistant", msg["content"]))
 
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
+            with st.spinner(""):
                 try:
                     # Invoke the agent
                     result = agent_executor.invoke({"messages": chat_history})
@@ -370,4 +425,4 @@ if prompt := st.chat_input("Ask me anything or attach a PDF...", accept_file=Tru
                     # Save assistant response to state
                     st.session_state.messages.append({"role": "assistant", "content": final_response})
                 except Exception as e:
-                    st.error(f"An error occurred: {e}")
+                    st.error(f"Something went wrong: {e}")

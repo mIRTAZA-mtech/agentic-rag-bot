@@ -1,0 +1,198 @@
+/* ── Google Font ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+/* ── Root Variables ── */
+:root {
+    --bg:       #0e0e10;
+    --surface:  #18181b;
+    --border:   #27272a;
+    --text:     #fafafa;
+    --muted:    #a1a1aa;
+    --accent:   #a78bfa;
+    --accent-dim: rgba(167, 139, 250, .12);
+}
+
+/* ── Global Reset ── */
+html, body, [data-testid="stAppViewContainer"],
+[data-testid="stApp"] {
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+[data-testid="stHeader"] { background: transparent !important; }
+
+/* ── Fade-in keyframe ── */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 var(--accent-dim); }
+    50%      { box-shadow: 0 0 18px 4px var(--accent-dim); }
+}
+@keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+@keyframes typing-dot {
+    0%, 80%, 100% { opacity: .25; transform: scale(.8); }
+    40%           { opacity: 1;   transform: scale(1); }
+}
+
+/* ── Header Area ── */
+.hero-header {
+    text-align: center;
+    padding: 2.5rem 0 1rem;
+    animation: fadeUp .6s ease-out;
+}
+.hero-header .logo {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), #6d28d9);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 22px; color: #fff;
+    margin-bottom: .75rem;
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+.hero-header h1 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    margin: 0;
+    color: var(--text);
+}
+.hero-header p {
+    font-size: .8rem;
+    color: var(--muted);
+    margin: .35rem 0 0;
+    font-weight: 300;
+}
+
+/* ── Capability Pills ── */
+.pills {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: .45rem; padding: .5rem 0 1.5rem;
+    animation: fadeUp .8s ease-out;
+}
+.pill {
+    font-size: .65rem;
+    padding: .3rem .7rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    background: var(--surface);
+    transition: all .25s ease;
+}
+.pill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+}
+
+/* ── Chat Messages ── */
+[data-testid="stChatMessage"] {
+    animation: fadeUp .35s ease-out;
+    border: none !important;
+    background: transparent !important;
+    padding: .6rem 0 !important;
+}
+
+/* user bubble */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid="stMarkdownContainer"] {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px 16px 4px 16px;
+    padding: .75rem 1rem;
+    color: var(--text);
+    font-size: .85rem;
+    line-height: 1.55;
+}
+
+/* assistant bubble */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid="stMarkdownContainer"] {
+    background: transparent;
+    border-left: 2px solid var(--accent);
+    border-radius: 0;
+    padding: .5rem 1rem;
+    color: var(--text);
+    font-size: .85rem;
+    line-height: 1.6;
+}
+
+/* ── Chat Input ── */
+[data-testid="stChatInput"] {
+    border-top: 1px solid var(--border) !important;
+    background: var(--bg) !important;
+}
+[data-testid="stChatInput"] textarea {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    color: var(--text) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: .85rem !important;
+    transition: border-color .2s ease;
+}
+[data-testid="stChatInput"] textarea:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 2px var(--accent-dim) !important;
+}
+
+/* ── Spinner ── */
+[data-testid="stSpinner"] {
+    color: var(--accent) !important;
+}
+.stSpinner > div {
+    border-top-color: var(--accent) !important;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ── Divider line ── */
+.divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0 auto 1rem;
+    width: 60%;
+    animation: fadeUp 1s ease-out;
+}
+
+/* ── Hide default Streamlit title ── */
+[data-testid="stAppViewContainer"] > div:first-child h1 { display: none; }
+
+/* ── Empty state ── */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    animation: fadeUp .9s ease-out;
+}
+.empty-state .icon {
+    font-size: 2.5rem;
+    margin-bottom: .5rem;
+    opacity: .4;
+}
+.empty-state p {
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 300;
+    max-width: 320px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* ── Status toast ── */
+.status-toast {
+    display: inline-block;
+    padding: .4rem .85rem;
+    background: var(--accent-dim);
+    border: 1px solid rgba(167,139,250,.25);
+    border-radius: 8px;
+    font-size: .75rem;
+    color: var(--accent);
+    animation: fadeUp .4s ease-out;
+}
